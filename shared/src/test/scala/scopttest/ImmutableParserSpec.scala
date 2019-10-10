@@ -160,6 +160,10 @@ object ImmutableParserSpec extends SimpleTestSuite with PowerAssertions {
     requiredWithFallback(args = Seq("--stringValue", "provided"), expected = "provided")
   }
 
+  test(".required().withDefault() should use the provided default value") {
+    requiredWithDefault(args = Seq("--stringValue"), default = "default", expected = "default")
+  }
+
   test(".required().withFallback() should use the fallback value") {
     requiredWithFallback(args = Nil, expected = "someFallback")
   }
@@ -536,6 +540,15 @@ Usage: scopt [options]
       opt[String]("stringValue")
         .required()
         .withFallback(() => "someFallback")
+        .action((x, c) => c.copy(stringValue = x))
+    }.parse(args, Config()) == Some(Config(stringValue = expected)))
+
+  def requiredWithDefault(args: Seq[String], default: String, expected: String): Unit =
+    assert(new scopt.OptionParser[Config]("scopt") {
+      head("scopt", "3.x")
+      opt[String]("stringValue")
+        .required()
+        .withDefault(default)
         .action((x, c) => c.copy(stringValue = x))
     }.parse(args, Config()) == Some(Config(stringValue = expected)))
 
